@@ -4,14 +4,9 @@ echo "Creating Servers"
 echo "Creating Manager Nodes"
 scw create --bootscript="docker" --name="manager-01" --commercial-type="VC1S" --ip-address=dynamic Centos
 scw create --bootscript="docker" --name="manager-02" --commercial-type="VC1S" --ip-address=dynamic Centos
-scw create --bootscript="docker" --name="manager-03" --commercial-type="VC1S" --ip-address=dynamic Centos
 
 echo "Creating Internal Manager Nodes"
 scw create --bootscript="docker" --name="internal-manager-01" --commercial-type="VC1S" --ip-address=dynamic Centos
-
-echo "Creating LoadBalancing Nodes"
-scw create --bootscript="docker" --name="lb-01" --commercial-type="VC1S" --ip-address=dynamic Centos
-scw create --bootscript="docker" --name="lb-02" --commercial-type="VC1S" --ip-address=dynamic Centos
 
 echo "Creating Production Worker Nodes"
 scw create --bootscript="docker" --name="worker-01" --commercial-type="VC1S" --ip-address=dynamic Centos
