@@ -1,0 +1,45 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+  - name: ensure firewall is at the latest version
+    yum: name=firewalld state=latest
+  - name: ensure firewall is running (and enable it at boot)
+    service: name=firewalld state=started enabled=yes
+  - name: Add public interface
+    command: firewall-cmd --zone=public --change-interface=eth0 --permanent
+  - name: Set public as default policy
+    command: firewall-cmd --set-default-zone=public
+  - name: Add http service
+    command: firewall-cmd --zone=public --remove-service=http --permanent
+  - name: Add https service
+    command: firewall-cmd --zone=public --remove-service=https --permanent
+  - name: Add ssh service
+    command: firewall-cmd --zone=public --add-service=ssh --permanent
+  - name: Trust the internal network
+    command: firewall-cmd --zone=public --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" accept'
+  - name: Reload firewall
+    command: firewall-cmd --reload
+  - name: remove docker packages
+    command: yum -y remove docker docker-engine docker-common container-selinux
+  - name: remove selinux
+    command: yum -y remove docker-selinux
+  - name: install config manager
+    command: yum install -y yum-utils
+  - name: set up docker stable repository
+    command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  - name: ensure docker is at the latest version
+    yum: name=docker-ce state=latest
+  - name: ensure docker is running (and enable it at boot)
+    service: name=docker state=started enabled=yes
+  - name: finding private ip information
+    debug: "msg={{ ansible_eth0.ipv4.address }}"
+  - replace:
+      dest: '/usr/lib/systemd/system/docker.service'
+      regexp: 'ExecStart=/usr/bin/dockerd'
+      replace: 'ExecStart=/usr/bin/dockerd --experimental -H tcp://{{ ansible_eth0.ipv4.address }}:2375 -H unix:///var/run/docker.sock'
+      backup: yes
+  - systemd:
+      state: restarted
+      daemon_reload: yes
+      name: docker

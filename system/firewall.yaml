@@ -1,0 +1,10 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+  - name: Remove http service
+    command: firewall-cmd --zone=public --remove-service=http --permanent
+  - name: Remove https service
+    command: firewall-cmd --zone=public --remove-service=https --permanent
+  - name: Reload firewall
+    command: firewall-cmd --reload
